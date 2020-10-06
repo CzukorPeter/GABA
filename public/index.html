@@ -1,0 +1,116 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>GIBA 2.0</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+
+    <link rel="stylesheet" href="https://labs.easyblog.it/maps/leaflet-search/src/leaflet-search.css" />
+
+
+	
+</head>
+<body>
+
+
+
+<div id="mapid" style="width: 1980px; height: 920px;"></div>
+
+<script type="text/javascript" src="giba.js"></script>
+<script src="leaflet-search.js"></script>
+
+<script>
+
+var map = L.map('mapid').setView([46.340941, 19.95], 10.5);
+
+
+L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+	maxZoom: 20,
+}).addTo(map);
+
+
+var lyrGiba;
+  lyrGiba = L.imageOverlay('https://firebasestorage.googleapis.com/v0/b/giba2-a540b.appspot.com/o/giba_01_kicsi.jpg?alt=media&token=8a783be4-ae90-4247-a04e-3e675244ead2', [[46.242998, 20.131713], [46.23345, 20.148733]]).addTo(map);
+
+
+
+  function highlightFeature(e) {
+		var layer = e.target;
+
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
+
+	}
+  
+
+
+var featuresLayer = new L.GeoJSON(giba, {style: polystyle});
+    function onEachFeature(feature, layer) {
+    }
+
+    map.addLayer(featuresLayer);
+
+     function polystyle(feature) {
+    return {
+        fillColor: 'white',
+        weight: 1.25,
+        color: '#579ABE',  //Outline color
+        fillOpacity: 0
+    };
+}
+
+L.geoJson(giba, {style: polystyle}).addTo(map);
+ 
+  
+  var searchControl = new L.Control.Search({
+		layer: featuresLayer,
+		propertyName: 'giba_szam',
+		marker: false,
+		moveToLocation: function(latlng, title, map) {
+			//map.fitBounds( latlng.layer.getBounds() );
+			var zoom = map.getBoundsZoom(latlng.layer.getBounds());
+  			map.setView(latlng, zoom); // access the zoom
+		}
+  });
+
+ 
+
+
+  searchControl.on('search:locationfound', function(e) {
+		
+		//console.log('search:locationfound', );
+
+		//map.removeLayer(this._markerSearch)
+
+		e.layer.setStyle({fillColor: '#3f0', color: '#0f0'});
+		if(e.layer._popup)
+			e.layer.openPopup();
+
+	}).on('search:collapsed', function(e) {
+
+		featuresLayer.eachLayer(function(layer) {	//restore feature color
+			featuresLayer.resetStyle(layer);
+		});	
+	});
+	
+	map.addControl( searchControl );  //inizialize search control
+
+
+
+
+
+</script>
+
+
+
+</body>
+</html>
